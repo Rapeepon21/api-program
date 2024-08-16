@@ -1,7 +1,7 @@
 const express = require("express");
 const { dbQuery } = require("./src/utils");
 const cors = require ('cors'); 
-//require('dotenv').config();
+require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000
 
@@ -77,6 +77,20 @@ app.patch("/to-do-list", async (req, res) => {
         res.status(500).send({ status: false, msg: error.message });
     }
 });
+
+
+app.patch("/to-do-list/id",async(req,res)=>{
+    try {
+        const id = req.body.id
+        if (!id) return res.status(400).send({status:false})
+        const sql=`UPDATE datauser.user SET id = 'id' WHERE id = ${id}` 
+        const result = await dbQuery(sql)
+        res.send({ status: true, result })
+        
+    } catch (error) {
+        res.send({ status: false, msg:error.message})
+    }
+})
 
 app.delete("/to-do-list", async (req, res) => {
     try { 
