@@ -94,16 +94,19 @@ app.patch("/to-do-list/id",async(req,res)=>{
 
 app.delete("/to-do-list", async (req, res) => {
     try { 
-        const id= req.body.id
-        //console.log("id:", id);
-        if (!id) return res.status(400).send({ status: false });
-          let sql = `DELETE FROM datauser.user WHERE id = "${id}";`
-         //console.log("SQL Query:", sql); 
-         const result = await dbQuery(sql);
-        res.send({ status: true, result });
-    } catch (error) {
+        const id = req.body.id;
+        if (!id) return res.status(400).send({ status: false, msg: "ID is required" });
 
-        res.send({ status: false, msg: error.message });
+        let sql = `DELETE FROM datauser.user WHERE id = "${id}";`;
+        const result = await dbQuery(sql);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).send({ status: false, msg: "No record found with the provided ID" });
+        }
+
+        res.send({ status: true, msg: "Record deleted successfully" });
+    } catch (error) {
+        res.status(500).send({ status: false, msg: error.message });
     }
 });
 
