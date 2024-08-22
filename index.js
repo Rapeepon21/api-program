@@ -17,21 +17,22 @@ app.use(cors(),express.json(), express.urlencoded({ extended: true }))
 
 app.post("/to-do-list", async (req, res) => {
     try { 
-        const  name = req.body.name;
+        const name = req.body.name;
         const age = req.body.age;
         const number = req.body.number;
         const email = req.body.email;
+        const time = req.body.time;
+    
 
-        
-
-        // ตรวจสอบว่ามีการส่งค่าที่จำเป็นทั้งหมดหรือไม่
-        if (!name || !age || !number) {
-            return res.status(400).send({ status: false, msg: "All fields (name, age, number) are required" });
+        // Check that all required fields are provided
+        if (!name || !age || !number || !email||!time ) {
+            return res.status(400).send({ status: false, msg: "All fields (name, age, number, email) are required" });
         }
 
-        // SQL query โดยไม่ระบุ id เนื่องจากเป็น AUTO_INCREMENT
-        const sql = `INSERT INTO datauser.user (name, age, number,email) VALUES ('${name}', '${age}', '${number}','${email}');`
-        const result = await dbQuery(sql, [name, age, number]);
+      
+        // Insert into the database
+        const sql = `INSERT INTO dataalluser.user (name, age, number, email,time) VALUES  ('${name}','${age}','${number}','${email}','${time}');`
+        const result = await dbQuery(sql, [name, age, number, email,time]);
 
         res.send({ status: true, result });
         
@@ -40,9 +41,12 @@ app.post("/to-do-list", async (req, res) => {
     }
 });
 
+
+
+
 app.get("/to-do-list", async(req,res)=>{
     try {
-        const sql=`SELECT * FROM datauser.user;`
+        const sql=`SELECT * FROM dataalluser.user;`
         const result = await dbQuery(sql)
         res.send({ status: true, result })
         
@@ -52,45 +56,52 @@ app.get("/to-do-list", async(req,res)=>{
      
 })
 
-app.patch("/to-do-list", async (req, res) => {
-    try {
-        const name = req.body.name;
-        const age = req.body.age;
-        const number = req.body.number;
-        const email = req.body.email;
-        const id = req.body.id;
+// app.patch("/to-do-list", async (req, res) => {
+//     try {
+//         const name = req.body.name;
+//         const age = req.body.age;
+//         const number = req.body.number;
+//         const email = req.body.email;
+//         const id = req.body.id;
         
-        if (!id) return res.status(400).send({ status: false, msg: "ID is required" });
-        if (!name || !age || !number || !email) {
-            return res.status(400).send({ status: false, msg: "All fields (name, age, number, email) are required" });
-        }
+//         if (!id || !id ==0 ) return res.status(400).send({ status: false, msg: "ID is required" });
+//         if (!name || !age || !number || !email) {
+//             return res.status(400).send({ status: false, msg: "All fields (name, age, number, email) are required" });
+//         }
     
-        const sql = `UPDATE datauser.user SET name = '${name}', age = ${age}, number = '${number}', email = '${email}' WHERE id = ${id}`;
+//         const sql = `UPDATE dataalluser.user SET name = '${name}', age = ${age}, number = '${number}', email = '${email}' WHERE id = ${id}`;
 
-        console.log(`Executing SQL: ${sql}`);
+//         const result = await dbQuery(sql);
 
-        const result = await dbQuery(sql);
+
+//         if (result.affectedRows === 0) {
+//             return res.status(404).send({ status: false, msg: "No record found with the provided ID" });
+//         }
+//         res.send({ status: true, result });
+//     } catch (error) {
+//         console.error(`Error updating user: ${error.message}`);
+//         res.status(500).send({ status: false, msg: error.message });
+//     }
+// });
+
+
+app.patch("/to-do-list/:id", async (req, res) => {
+    try {
+        const id = req.params.id;
+        const{name,age,number,email,time}=req.body
+
+        if (!name || !age || !number || !email || !time)
+             return res.status(400).send({ status: false, msg: "Both current ID and new ID are required" });
+
+        const sql = `UPDATE dataalluser.user SET id = ${id}, name = ${name}, age = ${age}, number = ${number}, email = ${email},time = ${time}, WHERE id = ${id}`;
+        const result = await dbQuery(sql, [name, age, number, email,time, id]);
 
         res.send({ status: true, result });
+
     } catch (error) {
-        console.error(`Error updating user: ${error.message}`);
         res.status(500).send({ status: false, msg: error.message });
     }
 });
-
-
-app.patch("/to-do-list/id",async(req,res)=>{
-    try {
-        const id = req.body.id
-        if (!id) return res.status(400).send({status:false})
-        const sql=`UPDATE datauser.user SET id = 'id' WHERE id = ${id}` 
-        const result = await dbQuery(sql)
-        res.send({ status: true, result })
-        
-    } catch (error) {
-        res.send({ status: false, msg:error.message})
-    }
-})
 
 app.delete("/to-do-list", async (req, res) => {
     try { 
