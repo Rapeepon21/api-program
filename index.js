@@ -195,7 +195,7 @@ app.delete("/to-do-list", async (req, res) => {
         const id = req.body.id;
         if (!id) return res.status(400).send({ status: false, msg: "ID is required" });
 
-        const sql = `UPDATE dataalluser.user SET id = ${id} WHERE id = ${id};`;
+        const sql = `DELETE FROM dataalluser.user WHERE id = ${id};`;
         const result = await dbQuery(sql);
 
         if (result.affectedRows === 0) {
